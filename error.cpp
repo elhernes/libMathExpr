@@ -39,7 +39,7 @@ Error *Error::s_error = 0;
  * @PARAM arg   an argument which will be filled in in the message,
  *              replacing %s, %i, %f, %c
  */
-Error::Error(const int row, const int col, const int id, ...)
+Error::Error(const int row, const int col, const EId id, ...)
 : err_row(row), err_col(col), err_id(id)
 {
     //sprintf(msg, msgdesc(id));
@@ -56,32 +56,33 @@ Error::Error(const int row, const int col, const int id, ...)
  * Returns a pointer to the message description for the given message id.
  * Returns "Unknown error" if id was not recognized.
  */
-const char* Error::msgdesc(const int id)
+const char* Error::msgdesc(const Error::EId id)
 {
     switch (id)
     {
         // syntax errors
-        case 1: return "Syntax error in part \"%s\"";
-        case 2: return "Syntax error";
-        case 3: return "Parentesis ) missing";
-        case 4: return "Empty expression";
-        case 5: return "Unexpected part \"%s\"";
-        case 6: return "Unexpected end of expression";
-        case 7: return "Value expected";
+        case eid_Syntax1: return "Syntax error in part \"%s\"";
+        case eid_Syntax2: return "Syntax error";
+        case eid_Paren: return "Parentesis ) missing";
+        case eid_EmptyExpr: return "Empty expression";
+        case eid_UnexpectedPart: return "Unexpected part \"%s\"";
+        case eid_ExprEof: return "Unexpected end of expression";
+        case eid_ExpectedValue: return "Value expected";
 
         // wrong or unknown operators, functions, variables
-        case 101: return "Unknown operator %s";
-        case 102: return "Unknown function %s";
-        case 103: return "Unknown variable %s";
+        case eid_UnknownOp: return "Unknown operator %s";
+        case eid_UndefFunc: return "Unknown function %s";
+        case eid_UndefVar: return "Unknown variable %s";
+        case eid_InvalidParam: return "Invalid Parameters";
 
         // domain errors
-        case 200: return "Too long expression, maximum number of characters exceeded";
+        case eid_ExprTooLong: return "Too long expression, maximum number of characters exceeded";
 
         // error in assignments of variables
-        case 300: return "Defining variable failed";
+        case eid_DefineVar: return "Defining variable failed";
 
         // error in functions
-        case 400: return "Integer value expected in function %s";
+        case eid_NotInteger: return "Integer value expected in function %s";
     }
 
     return "Unknown error";

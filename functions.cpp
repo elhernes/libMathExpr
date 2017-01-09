@@ -39,7 +39,7 @@ double factorial(double value) {
   int v = static_cast<int>(value);
 
   if (value != static_cast<double>(v)) {
-    Error::s_error = new Error(-1, -1, 400, "factorial");
+    Error::s_error = new Error(-1, -1, Error::eid_NotInteger, "factorial");
   }
 
   if (Error::s_error == 0) {
@@ -64,3 +64,4 @@ double sign(double value)
     if (value < 0) return -1;
     return 0;
 }
+

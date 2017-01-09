@@ -119,12 +119,12 @@ class MathExpr
         double parse_level7();
         double parse_level8();
         double parse_level9();
-        double parse_level10();
+	std::vector <double> parse_level10();
         double parse_number();
 
         int get_operator_id(const char op_name[]);
         double eval_operator(const int op_id, const double &lhs, const double &rhs);
-        double eval_function(const char fn_name[], const double &value);
+        double eval_function(const char fn_name[], const std::vector<double> &value);
         double eval_variable(const char var_name[]);
 
         int row();

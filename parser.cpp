@@ -59,7 +59,7 @@ char* MathExpr::parse(const char new_expr[]) {
 
   // check the length of expr
   if ((int)strlen(new_expr) > EXPR_LEN_MAX) {
-    Error::s_error = new Error(row(), col(), 200);
+    Error::s_error = new Error(row(), col(), Error::eid_ExprTooLong);
   }
 
   if (Error::s_error == 0) {
@@ -70,7 +70,7 @@ char* MathExpr::parse(const char new_expr[]) {
 
     getToken();
     if (token_type == DELIMETER && *token == '\0') {
-      Error::s_error = new Error(row(), col(), 4);
+      Error::s_error = new Error(row(), col(), Error::eid_EmptyExpr);
     }
   }
 
@@ -82,9 +82,11 @@ char* MathExpr::parse(const char new_expr[]) {
     if (token_type != DELIMETER || *token != '\0') {
       if (token_type == DELIMETER) {
       // user entered a not existing operator like "//"
-	Error::s_error = new Error(row(), col(), 101, token);
+	Error::s_error = new Error(row(), col(), Error::eid_UnknownOp, token);
       } else {
-	Error::s_error = new Error(row(), col(), 5, token);
+	printf("%d is not a delimeter t[%s] e[%s]\n", token_type, token, expr);
+	fflush(stdout);
+	Error::s_error = new Error(row(), col(), Error::eid_UnexpectedPart, token);
       }
     }
 
@@ -98,8 +100,8 @@ char* MathExpr::parse(const char new_expr[]) {
 
   if (Error::s_error) {
     if (Error::s_error->get_row() == -1) {
-      snprintf(ans_str, sizeof(ans_str), "Error: %s (col %i)",
-	       Error::s_error->get_msg(), Error::s_error->get_col());
+      snprintf(ans_str, sizeof(ans_str), "Error: %s (col %i) [%s]",
+	       Error::s_error->get_msg(), Error::s_error->get_col(), expr);
     } else {
       snprintf(ans_str, sizeof(ans_str), "Error: %s (ln %i, col %i)",
 	       Error::s_error->get_msg(), Error::s_error->get_row(), Error::s_error->get_col());
@@ -136,9 +138,11 @@ bool isWhiteSpace(const char c)
 bool isDelimeter(const char c)
 {
     if (c == 0) return 0;
-    return strchr("&|<>=+/*%^!", c) != 0;
+    return strchr("&|<>=+/*%^!,", c) != 0;
 }
 
+#if 0
+// XXX-ELH- not called and looks to be exactly the same as isDelimeter()
 /*
  * checks if the given char c is NO delimeter
  */
@@ -147,6 +151,7 @@ bool isNotDelimeter(const char c)
     if (c == 0) return 0;
     return strchr("&|<>=+-/*%^!()", c) != 0;
 }
+#endif
 
 /*
  * checks if the given char c is a letter or undersquare
@@ -319,7 +324,7 @@ void MathExpr::getToken()
         t++;
     }
     *t = '\0';
-    Error::s_error = new Error(row(), col(), 1, token);
+    Error::s_error = new Error(row(), col(), Error::eid_Syntax1, token);
 
     return;
 }
@@ -347,7 +352,7 @@ double MathExpr::parse_level1()
             ans = parse_level2();
             if (user_var.add(token_now, ans) == false)
             {
-                Error::s_error = new Error(row(), col(), 300);
+                Error::s_error = new Error(row(), col(), Error::eid_DefineVar);
             }
             return ans;
         }
@@ -526,7 +531,7 @@ double MathExpr::parse_level9()
     }
     else
     {
-        ans = parse_level10();
+        ans = parse_level10()[0];
     }
 
     return ans;
@@ -536,28 +541,41 @@ double MathExpr::parse_level9()
 /*
  * parenthesized expression or value
  */
-double MathExpr::parse_level10()
-{
-    // check if it is a parenthesized expression
-    if (token_type == DELIMETER)
-    {
-        if (token[0] == '(' && token[1] == '\0')
-        {
-            getToken();
-            double ans = parse_level2();
-            if (token_type != DELIMETER || token[0] != ')' || token[1] || '\0')
-            {
-                Error::s_error = new Error(row(), col(), 3);
-            }
-            getToken();
-            return ans;
-        }
+std::vector<double>
+MathExpr::parse_level10() {
+  std::vector<double> ans;
+  // check if it is a parenthesized expression
+  if (token_type == DELIMETER) {
+    if (token[0] == '(' && token[1] == '\0') {
+#if 0
+      getToken();
+      ans.push_back(parse_level2());
+      if (token_type != DELIMETER || token[0] != ')' || token[1] || '\0') {
+	Error::s_error = new Error(row(), col(), Error::eid_Paren);
+      }
+      getToken();
+      return ans;
+#else
+      for(;;) {
+	getToken();
+	double dv = parse_level2();
+	ans.push_back(dv);
+	if (token_type == DELIMETER && token[0] == ')' && token[1] == '\0') {
+	  getToken();
+	  return ans;
+	} else if (token_type == DELIMETER &&
+		   token[0] == ',' && token[1] == '\0') {
+	} else {
+	  Error::s_error = new Error(row(), col(), Error::eid_Paren);
+	}
+      }
+#endif
     }
-    
-    // if not parenthesized then the expression is a value
-    return (Error::s_error==0)?parse_number():0.0;
+  }
+  // if not parenthesized then the expression is a value
+  ans.push_back((Error::s_error==0)?parse_number():0.0);
+  return ans;
 }
-
 
 double MathExpr::parse_number()
 {
@@ -581,11 +599,11 @@ double MathExpr::parse_number()
             // syntax error or unexpected end of expression
             if (token[0] == '\0')
             {
-                Error::s_error = new Error(row(), col(), 6);
+                Error::s_error = new Error(row(), col(), Error::eid_ExprEof);
             }
             else
             {
-	        Error::s_error = new Error(row(), col(), 7);
+	        Error::s_error = new Error(row(), col(), Error::eid_ExpectedValue);
             }
             break;
     }
@@ -672,7 +690,7 @@ double MathExpr::eval_operator(const int op_id, const double &lhs, const double 
         case FACTORIAL: return factorial(lhs);
     }
 
-    Error::s_error  = new Error(row(), col(), 104, op_id);
+    Error::s_error  = new Error(row(), col(), Error::eid_InvalidParam, op_id);
     return 0;
 }
 
@@ -680,30 +698,43 @@ double MathExpr::eval_operator(const int op_id, const double &lhs, const double 
 /*
  * evaluate a function
  */
-double MathExpr::eval_function(const char fn_name[], const double &value) {
+double MathExpr::eval_function(const char fn_name[], const std::vector<double> &arg) {
   // first make the function name upper case
   char fnU[NAME_LEN_MAX+1];
   toupper(fnU, fn_name);
 
-  // arithmetic
-  if (!strcmp(fnU, "ABS")) {return abs(value);}
-  if (!strcmp(fnU, "EXP")) {return exp(value);}
-  if (!strcmp(fnU, "SIGN")) {return sign(value);}
-  if (!strcmp(fnU, "SQRT")) {return sqrt(value);}
-  if (!strcmp(fnU, "LOG")) {return log(value);}
-  if (!strcmp(fnU, "LOG10")) {return log10(value);}
+  switch (arg.size()) {
+  case 1: {
+    double value = arg[0];
+    // arithmetic
+    if (!strcmp(fnU, "ABS")) {return abs(value);}
+    if (!strcmp(fnU, "EXP")) {return exp(value);}
+    if (!strcmp(fnU, "SIGN")) {return sign(value);}
+    if (!strcmp(fnU, "SQRT")) {return sqrt(value);}
+    if (!strcmp(fnU, "LOG")) {return log(value);}
+    if (!strcmp(fnU, "LOG10")) {return log10(value);}
 
-  // trigonometric
-  if (!strcmp(fnU, "SIN")) {return sin(value);}
-  if (!strcmp(fnU, "COS")) {return cos(value);}
-  if (!strcmp(fnU, "TAN")) {return tan(value);}
-  if (!strcmp(fnU, "ASIN")) {return asin(value);}
-  if (!strcmp(fnU, "ACOS")) {return acos(value);}
-  if (!strcmp(fnU, "ATAN")) {return atan(value);}
+    // trigonometric
+    if (!strcmp(fnU, "SIN")) {return sin(value);}
+    if (!strcmp(fnU, "COS")) {return cos(value);}
+    if (!strcmp(fnU, "TAN")) {return tan(value);}
+    if (!strcmp(fnU, "ASIN")) {return asin(value);}
+    if (!strcmp(fnU, "ACOS")) {return acos(value);}
+    if (!strcmp(fnU, "ATAN")) {return atan(value);}
 
-  // probability
-  if (!strcmp(fnU, "FACTORIAL")) {return factorial(value);}
-
+    // probability
+    if (!strcmp(fnU, "FACTORIAL")) {return factorial(value);}
+  }
+    break;
+  case 2: {
+    if (!strcmp(fnU, "MAX")) {return std::max(arg[0], arg[1]);}
+    if (!strcmp(fnU, "MIN")) {return std::min(arg[0], arg[1]);}
+  }
+    break;
+  default: {
+    Error::s_error = new Error(row(), col(), Error::eid_InvalidParam, fn_name);
+  }
+  }
 #if 0 // original code caught and re-threw the error... why?
   if (Error::s_error) {
     // retrow error, add information about column and row of occurance
@@ -713,7 +744,7 @@ double MathExpr::eval_function(const char fn_name[], const double &value) {
 #endif
 
   // unknown function
-  Error::s_error = new Error(row(), col(), 102, fn_name);
+  Error::s_error = new Error(row(), col(), Error::eid_UndefFunc, fn_name);
   return 0;
 }
 
@@ -748,7 +779,7 @@ double MathExpr::eval_variable(const char var_name[])
     }
 
     // unknown variable
-    Error::s_error = new Error(row(), col(), 103, var_name);
+    Error::s_error = new Error(row(), col(), Error::eid_UndefVar, var_name);
     return 0;
 }
 
