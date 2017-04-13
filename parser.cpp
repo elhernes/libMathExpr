@@ -85,7 +85,9 @@ char* MathExpr::parse(const char new_expr[]) {
 	Error::s_error = new Error(row(), col(), Error::eid_UnknownOp, token);
       } else {
 	printf("%d is not a delimeter t[%s] e[%s]\n", token_type, token, expr);
+#ifdef HOST_SOFTWARE
 	fflush(stdout);
+#endif
 	Error::s_error = new Error(row(), col(), Error::eid_UnexpectedPart, token);
       }
     }
@@ -541,9 +543,9 @@ double MathExpr::parse_level9()
 /*
  * parenthesized expression or value
  */
-std::vector<double>
+vector<double>
 MathExpr::parse_level10() {
-  std::vector<double> ans;
+  vector<double> ans;
   // check if it is a parenthesized expression
   if (token_type == DELIMETER) {
     if (token[0] == '(' && token[1] == '\0') {
@@ -698,7 +700,7 @@ double MathExpr::eval_operator(const int op_id, const double &lhs, const double 
 /*
  * evaluate a function
  */
-double MathExpr::eval_function(const char fn_name[], const std::vector<double> &arg) {
+double MathExpr::eval_function(const char fn_name[], const vector<double> &arg) {
   // first make the function name upper case
   char fnU[NAME_LEN_MAX+1];
   toupper(fnU, fn_name);
@@ -727,8 +729,8 @@ double MathExpr::eval_function(const char fn_name[], const std::vector<double> &
   }
     break;
   case 2: {
-    if (!strcmp(fnU, "MAX")) {return std::max(arg[0], arg[1]);}
-    if (!strcmp(fnU, "MIN")) {return std::min(arg[0], arg[1]);}
+    if (!strcmp(fnU, "MAX")) {return max(arg[0], arg[1]);}
+    if (!strcmp(fnU, "MIN")) {return min(arg[0], arg[1]);}
   }
     break;
   default: {
