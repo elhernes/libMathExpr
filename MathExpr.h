@@ -65,10 +65,6 @@
 #include "functions.h"
 #include "variablelist.h"
 
-#ifdef HOST_SOFTWARE
-using namespace std;
-#endif
-
 class MathExpr
 {
     // public functions
@@ -81,7 +77,7 @@ class MathExpr
     // enumerations
     private:
 
-        enum TOKENTYPE {NOTHING = -1, DELIMETER, NUMBER, VARIABLE, FUNCTION, UNKNOWN};
+        enum TOKENTYPE {NOTHING = -1, DELIMETER, NUMBER, VARIABLE, FUNCTION, ME_UNKNOWN};
 
         enum OPERATOR_ID {AND, OR, BITSHIFTLEFT, BITSHIFTRIGHT,                 // level 2
                        EQUAL, UNEQUAL, SMALLER, LARGER, SMALLEREQ, LARGEREQ,    // level 3
@@ -119,12 +115,12 @@ class MathExpr
         double parse_level7();
         double parse_level8();
         double parse_level9();
-	vector <double> parse_level10();
+	std::vector <double> parse_level10();
         double parse_number();
 
         int get_operator_id(const char op_name[]);
         double eval_operator(const int op_id, const double &lhs, const double &rhs);
-        double eval_function(const char fn_name[], const vector<double> &value);
+        double eval_function(const char fn_name[], const std::vector<double> &value);
         double eval_variable(const char var_name[]);
 
         int row();

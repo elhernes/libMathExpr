@@ -27,11 +27,7 @@
  */
 
 // declarations
-#include <libMathExpr/MathExpr.h>
-
-#ifdef HOST_SOFTWARE
-using namespace std;
-#endif
+#include "MathExpr.h"
 
 /*
  * constructor.
@@ -318,7 +314,7 @@ void MathExpr::getToken()
     }
 
     // something unknown is found, wrong characters -> a syntax error
-    token_type = UNKNOWN;
+    token_type = ME_UNKNOWN;
     while (*e != '\0')
     {
         *t = *e;
@@ -543,9 +539,9 @@ double MathExpr::parse_level9()
 /*
  * parenthesized expression or value
  */
-vector<double>
+std::vector<double>
 MathExpr::parse_level10() {
-  vector<double> ans;
+  std::vector<double> ans;
   // check if it is a parenthesized expression
   if (token_type == DELIMETER) {
     if (token[0] == '(' && token[1] == '\0') {
@@ -700,7 +696,7 @@ double MathExpr::eval_operator(const int op_id, const double &lhs, const double 
 /*
  * evaluate a function
  */
-double MathExpr::eval_function(const char fn_name[], const vector<double> &arg) {
+double MathExpr::eval_function(const char fn_name[], const std::vector<double> &arg) {
   // first make the function name upper case
   char fnU[NAME_LEN_MAX+1];
   toupper(fnU, fn_name);
@@ -729,8 +725,8 @@ double MathExpr::eval_function(const char fn_name[], const vector<double> &arg) 
   }
     break;
   case 2: {
-    if (!strcmp(fnU, "MAX")) {return max(arg[0], arg[1]);}
-    if (!strcmp(fnU, "MIN")) {return min(arg[0], arg[1]);}
+    if (!strcmp(fnU, "MAX")) {return std::max(arg[0], arg[1]);}
+    if (!strcmp(fnU, "MIN")) {return std::min(arg[0], arg[1]);}
   }
     break;
   default: {

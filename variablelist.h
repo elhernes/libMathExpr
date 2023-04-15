@@ -32,10 +32,6 @@
 
 #include "constants.h"
 
-#ifdef HOST_SOFTWARE
-using namespace std;
-#endif
-
 void toupper(char upper[], const char str[]);
 
 
@@ -57,7 +53,7 @@ class Variablelist {
             double value;
         };
 
-        vector<VAR> var;
+	std::vector<VAR> var;
 };
 
 
