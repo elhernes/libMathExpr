@@ -26,10 +26,6 @@
 
 #include "error.h"
 
-#ifdef HOST_SOFTWARE
-using namespace std;
-#endif
-
 /*
  * calculate factorial of value
  * for example 5! = 5*4*3*2*1 = 120

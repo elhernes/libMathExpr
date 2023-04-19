@@ -25,10 +25,6 @@
 //#include "constants.h"
 #include "error.h"
 
-#ifdef HOST_SOFTWARE
-using namespace std;
-#endif
-
 Error *Error::s_error = 0;
 
 /**

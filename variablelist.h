@@ -46,6 +46,8 @@ class Variablelist {
         int  get_id(const char* name);
         bool set_value(const char* name, const double value);
 
+	void dump();
+
     private:
         struct VAR
         {

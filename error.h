@@ -30,10 +30,6 @@
 #include <cstdarg>
 #include <cstring>
 
-#ifdef HOST_SOFTWARE
-using namespace std;
-#endif
-
 class Error {
     public:
   enum EId {
@@ -59,7 +55,7 @@ class Error {
   int get_row() {return err_row;} // Returns the row of the error
   int get_col() {return err_col;} // Returns the column of the error
   int get_id() {return err_id;}   // Returns the id of the error
-  char* get_msg() {return msg;}   // Returns a pointer to the error msg
+  const char* get_msg() const {return (const char *)msg;}   // Returns a pointer to the error msg
 
   static Error *s_error;
  private:

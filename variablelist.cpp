@@ -128,6 +128,12 @@ int Variablelist::get_id(const char* name)
     return -1;
 }
 
+void
+Variablelist::dump() {
+  for(const auto &v : var) {
+    printf("  %s => %f\n", v.name, v.value);
+  }
+}
 
 /*
  * str is copied to upper and made uppercase

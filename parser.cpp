@@ -81,9 +81,7 @@ char* MathExpr::parse(const char new_expr[]) {
 	Error::s_error = new Error(row(), col(), Error::eid_UnknownOp, token);
       } else {
 	printf("%d is not a delimeter t[%s] e[%s]\n", token_type, token, expr);
-#ifdef HOST_SOFTWARE
 	fflush(stdout);
-#endif
 	Error::s_error = new Error(row(), col(), Error::eid_UnexpectedPart, token);
       }
     }
@@ -106,6 +104,12 @@ char* MathExpr::parse(const char new_expr[]) {
     }
   }
   return ans_str;
+}
+
+void
+MathExpr::dumpVariables() {
+  printf("User Variables:\n");
+  user_var.dump();
 }
 
 /*

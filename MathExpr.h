@@ -73,7 +73,8 @@ class MathExpr
         char* parse(const char expr[]);
 	double getVariable(const char *var);
 	void setVariable(const char *var, double val);
-	bool getError(const class Error *(&em));
+	bool getError(const Error *(&em)) { em = m_error; return m_error!=nullptr;};
+	void dumpVariables();
     // enumerations
     private:
 

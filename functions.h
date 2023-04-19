@@ -27,10 +27,6 @@
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
 
-#ifdef HOST_SOFTWARE
-using namespace std;
-#endif
-
 double factorial(double value);
 double sign(double value);
 
