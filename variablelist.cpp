@@ -128,11 +128,15 @@ int Variablelist::get_id(const char* name)
     return -1;
 }
 
-void
+std::string
 Variablelist::dump() {
+  std::string rv;
   for(const auto &v : var) {
-    printf("  %s => %f\n", v.name, v.value);
+    char tmp[64];
+    snprintf(tmp, sizeof(tmp), "%s => %f\n", v.name, v.value);
+    rv += tmp;
   }
+  return rv;
 }
 
 /*

@@ -74,7 +74,7 @@ class MathExpr
 	double getVariable(const char *var);
 	void setVariable(const char *var, double val);
 	bool getError(const Error *(&em)) { em = m_error; return m_error!=nullptr;};
-	void dumpVariables();
+	std::string dumpVariables();
     // enumerations
     private:
 

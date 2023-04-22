@@ -29,6 +29,7 @@
 #include <cctype>
 #include <cstring>
 #include <vector>
+#include <string>
 
 #include "constants.h"
 
@@ -46,7 +47,7 @@ class Variablelist {
         int  get_id(const char* name);
         bool set_value(const char* name, const double value);
 
-	void dump();
+	std::string dump();
 
     private:
         struct VAR

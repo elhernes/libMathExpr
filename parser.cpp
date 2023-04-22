@@ -106,10 +106,9 @@ char* MathExpr::parse(const char new_expr[]) {
   return ans_str;
 }
 
-void
+std::string
 MathExpr::dumpVariables() {
-  printf("User Variables:\n");
-  user_var.dump();
+  return user_var.dump();
 }
 
 /*
